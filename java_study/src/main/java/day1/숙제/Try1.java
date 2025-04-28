@@ -46,11 +46,13 @@ enum타입으로 추움 더움 적당함
         return temperatureCelsius * 9/5 +32;
     }
 
-    public int getHumidity() {
+    public int getHumidity()
+    {
         return humidity;
     }
 
-    public double getPressureHpa() {
+    public double getPressureHpa()
+    {
         return pressureHpa;
     }
 
@@ -88,7 +90,6 @@ enum타입으로 추움 더움 적당함
             return TemperatureFeeling.HOT;
         }
     }
-
 
     @Override
     public boolean equals(Object o) {
