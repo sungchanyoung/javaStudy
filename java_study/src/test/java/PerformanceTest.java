@@ -1,6 +1,9 @@
+import day1.userDto;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+
+import static java.lang.Long.sum;
 
 public class PerformanceTest {
     @Test
@@ -44,7 +47,7 @@ public class PerformanceTest {
                     complexity += method.getParameterCount();
                     complexity += method.getExceptionTypes().length;
                     return complexity;
-                });
-
+                })
+                .sum();
     }
 }

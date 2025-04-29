@@ -1,4 +1,4 @@
-package 주문시스템불변객체.잘된구현;
+package day1.주문시스템불변객체.잘된구현;
 
 import java.util.ArrayList;
 import java.util.List;

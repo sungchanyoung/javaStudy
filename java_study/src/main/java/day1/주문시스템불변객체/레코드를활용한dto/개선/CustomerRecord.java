@@ -1,4 +1,4 @@
-package 주문시스템불변객체.레코드를활용한dto.개선;
+package day1.주문시스템불변객체.레코드를활용한dto.개선;
 
 import java.util.Objects;
 

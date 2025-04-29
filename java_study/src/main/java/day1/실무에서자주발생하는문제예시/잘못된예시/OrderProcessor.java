@@ -1,4 +1,4 @@
-package 실무에서자주발생하는문제예시.잘못된예시;
+package day1.실무에서자주발생하는문제예시.잘못된예시;
 class Order{
     String status;
     Customer customer;

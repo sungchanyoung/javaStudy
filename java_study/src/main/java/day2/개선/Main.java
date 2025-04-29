@@ -7,7 +7,7 @@ public class Main {
        OrderNew test = new OrderNew.Builder("test-1234","test")
                .items(List.of("ad","cd"))
                .deliveryAddress("test")
-                .build();
+               .build();
 
         System.out.println(test);
     }

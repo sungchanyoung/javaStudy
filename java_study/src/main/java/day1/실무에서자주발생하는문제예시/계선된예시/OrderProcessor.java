@@ -1,4 +1,4 @@
-package 실무에서자주발생하는문제예시.계선된예시;
+package day1.실무에서자주발생하는문제예시.계선된예시;
 
 import java.util.Objects;
 import java.util.Optional;
