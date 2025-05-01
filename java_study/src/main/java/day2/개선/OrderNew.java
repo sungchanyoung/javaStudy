@@ -24,7 +24,7 @@ public class OrderNew {
         this.specialInstructions = builder.specialInstructions;
     }
 
-    //필수것들만 final, 아닌것들은 final뺴기
+    //필수것들만 final, 아닌것들은 final 뺴기
     public static class Builder {
         private final String orderId;
         private final String customerName;

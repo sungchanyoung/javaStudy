@@ -26,7 +26,7 @@ public class LogAnalyzer {
 
 
         //정답
-        //1
+        //1 - 에러 로그 필터링 및 소스별 집계
         logs.stream()
                 .filter(log -> "ERROR".equals(log.getLevel()))
                 .collect(Collectors.groupingBy(
@@ -34,21 +34,21 @@ public class LogAnalyzer {
                         Collectors.counting()
                 ));
 
-        //2
+        //2 - 시간대 별 로그 수 집계
         Map<Integer,Long>logsByHours = logs.stream()
                 .collect(Collectors.groupingBy(
                         log -> log.getTimeStamp().getHour(),
                         Collectors.counting()
                 ));
 
-        //3
+        //3 - 특정 기워드를 포함한 로그 검색
         String keyword ="Exception";
         List<LogEntry> exception = logs.stream()
                 .filter(log -> log.getMessage().contains(keyword))
                 .sorted(Comparator.comparing(LogEntry::getTimeStamp))
                 .toList();
 
-        //4
+        //4 -로그레벨 별 메시지 연결
         Map<String, String> logsBySource = logs.stream()
                 .collect(Collectors.groupingBy(
                         LogEntry::getLevel,
