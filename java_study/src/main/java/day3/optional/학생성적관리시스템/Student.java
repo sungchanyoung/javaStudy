@@ -28,5 +28,12 @@ public class Student {
     }
 
     //학생 전공을 조회하는 메서드 만들기
+    public Optional<String> getMajor(String major){
+        if(major == null || major.isBlank()){
+            return Optional.empty();
+        }
+        return Optional.ofNullable(major);
+    }
+
 
 }
