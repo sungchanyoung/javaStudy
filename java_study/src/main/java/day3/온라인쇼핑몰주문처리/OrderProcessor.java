@@ -11,15 +11,18 @@ public class OrderProcessor {
     public static void main(String[] args) {
         // 샘플 주문 데이터 생성
         List<Order> orders = getOrders();
+        if(Objects.isNull(orders) || orders.isEmpty()){
+            throw new IllegalArgumentException("orders is null or empty. Please check your input data.");
+        }
 
         // 1. 총 주문 금액 계산
         // flatMap 을 사용하셔서 모든 주문에 포함된 상품들을 하나의 스트림으로 변환 한후 가격 합계 계산
+        //스트림 형태가 와야 sum을 사용할수 있다
         double orderTotal = orders.stream()
                 .flatMap(order -> order.getProducts().stream())
                 .mapToDouble(Product::getPrice)
                 .sum();
         System.out.println("총 주문 금액: " + orderTotal + "원");
-
 
         // 2. 카테고리별 판매 금액 집계
         // flatMap, grouping by, summingDouble
@@ -33,12 +36,13 @@ public class OrderProcessor {
 
 
         // 3. 최근 24시간 내 주문 필터링
+        //날짜를 변수로 뺴서 생각해보자 -minusDay(1)로
         List<Order> recentOrder = getOrders().stream()
                 .filter(order -> order.getOrderDate().isAfter(LocalDateTime.now().minusHours(24)))
-                .collect(Collectors.toList());
+                .toList();
         recentOrder.forEach(System.out::println);
 
-        // 4. 고객별 주문 횟수 및 총 금액 집계 (추가 예제)
+        // 4. 고객별-기준 주문 횟수 및 총 금액 집계 (추가 예제)
         Map<String, Double> customerOrder = getOrders().stream()
                 .collect(Collectors.groupingBy(
                         Order::getCustomerName,
