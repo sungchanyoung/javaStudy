@@ -24,6 +24,7 @@ public class FinancialAnalyzer {
                 .filter(criteria)
                 .toList();
     }
+
     //통계 계산
     public <R> R calculateStatics(
             Predicate<Transaction> filter,
