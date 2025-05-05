@@ -9,33 +9,33 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class FinancialAnalyzer {
-    private List<Transaction>transactions;
+    private List<Transaction> transactions;
 
-    public FinancialAnalyzer(){
+    public FinancialAnalyzer() {
         this.transactions = new ArrayList<>();
     }
 
-    public void  addTransactions(List<Transaction> transactions){
-        this.transactions.addAll(transactions);
-    }
-
-    public List<Transaction> filterTransactions(Predicate<Transaction> criteria){
+    public List<Transaction> filterTransactions(Predicate<Transaction> criteria) {
         return transactions.stream()
                 .filter(criteria)
                 .toList();
     }
 
-    //통계 계산
-    public <R> R calculateStatics(
+    // 통계 계산 메서드
+    public <R> R calculateStatistics(
             Predicate<Transaction> filter,
-            Function<List<Transaction>, R> statisticsCalculator
-    ){
+            Function<List<Transaction>, R> statCalculator
+    ) {
         List<Transaction> filteredTransactions = filterTransactions(filter);
-        return statisticsCalculator.apply(filteredTransactions);
+        return statCalculator.apply(filteredTransactions);
     }
 
-    //월별
-    public Map<Month, Map<String, Double>> getMonthFinanceSummary(){
+
+    public void addTransactions(List<Transaction> sampleTransactions) {
+        this.transactions.addAll(sampleTransactions);
+    }
+
+    public Map<Month, Map<String, Double>> getMonthlyFinanceSummary() {
         return transactions.stream()
                 .collect(Collectors.groupingBy(
                         Transaction::getMonth,
@@ -46,28 +46,26 @@ public class FinancialAnalyzer {
                 ));
     }
 
-    //카테고리별
-    public Map<String,Double> getCategoryExpenses(){
+    public Map<String, Double> getCategoryExpenses() {
         return transactions.stream()
-                .filter(tx->"expense".equals(tx.getType()))
+                .filter(tx -> "expense".equals(tx.getType()))
                 .collect(Collectors.groupingBy(
                         Transaction::getCategory,
                         Collectors.summingDouble(Transaction::getAmount)
                 ));
     }
 
-    //상위 지출
-    public List<Map.Entry<String,Double>> getTopExpenseCategories(int limit){
+    public List<Map.Entry<String, Double>> getTopExpenseCategories(int limit) {
         return getCategoryExpenses().entrySet().stream()
-                .sorted(Map.Entry.<String,Double>comparingByValue().reversed())
+                .sorted(Map.Entry.<String, Double>comparingByValue().reversed())
                 .limit(limit)
                 .toList();
     }
 
-    //수입 지출 계산
-    public double getExpenseToIncomeRatio(){
+    // 수입 / 지출 비율 계산
+    public double getExpenseToIncomeRatio() {
         double totalIncome = transactions.stream()
-                .filter(tx->"income".equals(tx.getType()))
+                .filter(tx -> "income".equals(tx.getType()))
                 .mapToDouble(Transaction::getAmount)
                 .sum();
 
@@ -76,78 +74,87 @@ public class FinancialAnalyzer {
                 .mapToDouble(Transaction::getAmount)
                 .sum();
 
-        return  (totalIncome > 0) ? (totalExpense/totalIncome) : 0.0;
+        return (totalIncome > 0) ? (totalExpense / totalIncome) : 0.0;
     }
 
-    //이상치 거래 감지
-    public List<Transaction> detectAnomalies(String type, double setDeviations){
+    // 이상치 거래 감지 메서드
+    public List<Transaction> detectAnomalies(String type, double stdDeviations) {
         List<Transaction> filteredTransactions = filterTransactions(tx -> type.equals(tx.getType()));
 
-        //평균과 표준 편차 계산
+        // 평균과 표준 편차 계산
         DoubleSummaryStatistics doubleSummaryStatistics = filteredTransactions.stream()
                 .mapToDouble(Transaction::getAmount)
                 .summaryStatistics();
 
         double mean = doubleSummaryStatistics.getAverage();
 
-        //표준 편차 계산
-       double variance = filteredTransactions.stream()
-                .mapToDouble(tx ->Math.pow(tx.getAmount()-mean,2))
-               .average()
-               .orElse(0.0);
+        // 표준편차를 계산
+        double variance = filteredTransactions.stream()
+                .mapToDouble(tx -> Math.pow(tx.getAmount() - mean, 2))
+                .average()
+                .orElse(0.0);
 
-       double stdDev = Math.sqrt(variance);
-       double threshold = mean + setDeviations * stdDev;
+        double stdDev = Math.sqrt(variance);
+        double threshold  = mean + (stdDev * stdDeviations);
 
-       return filteredTransactions.stream()
-               .filter(tx -> tx.getAmount() > threshold)
-               .toList();
+        return filteredTransactions.stream()
+                .filter(tx -> tx.getAmount() > threshold)
+                .toList();
     }
 
-    public List<Transaction> getTransactionsByDateRange(LocalDate startDate, LocalDate endDate){
+
+    public List<Transaction> getTransactionByDateRange(LocalDate startDate, LocalDate endDate) {
         return filterTransactions(tx ->
-                !tx.getDate().isBefore(startDate) && !tx.getDate().isAfter(endDate) );
+                !tx.getDate().isBefore(startDate) && !tx.getDate().isAfter(endDate));
     }
 
-    //월별 지출 트랜드
-    public Map<Month,Double>getMonthlyExpenseTrend(){
+    public Map<Month, Double> getMonthlyExpenseTrend() {
         return transactions.stream()
-                .filter(tx->"expense".equals(tx.getType()))
+                .filter(tx -> "expense".equals(tx.getType()))
                 .collect(Collectors.groupingBy(
                         Transaction::getMonth,
                         Collectors.summingDouble(Transaction::getAmount)
                 ));
     }
 
-    public Map<Month,Double>getMonthlyTrend(String category){
+    public Map<Month, Double> getCategoryMonthlyTrend(String category) {
         return transactions.stream()
-                .filter(tx ->"expense".equals(tx.getType()) && category.equals(tx.getCategory()))
+                .filter(tx -> "expense".equals(tx.getType()) && category.equals(tx.getCategory()))
                 .collect(Collectors.groupingBy(
                         Transaction::getMonth,
                         Collectors.summingDouble(Transaction::getAmount)
                 ));
     }
 
-    public Optional<Map.Entry<LocalDate,Double>> getHighesExpenseDay(){
-        Map<LocalDate,Double> dailyExpense = transactions.stream()
-                .filter(tx -> "expense".equals(tx.getType()),
-                        txList -> txList.stream()
-                                .mapToDouble(Transaction::getAmount)
-                                .sum());
+    public Optional<Map.Entry<LocalDate, Double>> getHighestExpenseDay() {
+        Map<LocalDate, Double> dailyExpenses = transactions.stream()
+                .filter(tx -> "expense".equals(tx.getType()))
+                .collect(Collectors.groupingBy(
+                        Transaction::getDate,
+                        Collectors.summingDouble(Transaction::getAmount)
+                ));
+
+        return dailyExpenses.entrySet().stream()
+                .max(Map.Entry.comparingByValue());
     }
+
+
 
     public static void main(String[] args) {
         FinancialAnalyzer analyzer = new FinancialAnalyzer();
+
+        // 샘플 데이터 초기화
         initializeSampleTransactions(analyzer);
 
-        //1번 람다식을 활용한 지출 계사
-        analyzer.calculateStatics(
-                tx ->"expense".equals(tx.getType()),
-                tlist ->tlist.stream()
+        // 1. 람다식을 활용한 총 지출 계산
+        Double totalExpenses = analyzer.calculateStatistics(
+                tx -> "expense".equals(tx.getType()),
+                txList -> txList.stream()
                         .mapToDouble(Transaction::getAmount)
                         .sum()
         );
-        System.out.println("총 지출: %,.0f원 \n");
+
+        System.out.printf("총 지출: %,.0f원\n", totalExpenses);
 
         // 2. 카테고리별 지출 계산
         Map<String, Double> categoryExpenses = analyzer.calculateStatistics(
@@ -202,7 +209,7 @@ public class FinancialAnalyzer {
         // 7. 특정 날짜 범위의 거래 조회
         LocalDate startDate = LocalDate.of(2023, 3, 1);
         LocalDate endDate = LocalDate.of(2023, 3, 31);
-        List<Transaction> marchTransactions = analyzer.getTransactionsByDateRange(startDate, endDate);
+        List<Transaction> marchTransactions = analyzer.getTransactionByDateRange(startDate, endDate);
 
         System.out.println("\n7. 3월 거래 내역:");
         marchTransactions.forEach(tx -> System.out.println("   " + tx));
