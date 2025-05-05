@@ -8,34 +8,38 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class FinancialAnalyzer {
+public class FinancialAnalyzerTry {
     private List<Transaction> transactions;
 
-    public FinancialAnalyzer() {
+    public FinancialAnalyzerTry() {
         this.transactions = new ArrayList<>();
     }
 
+    //통계 계산
+    //filter :Predicate 타입의 함수형 인터페이스를 인자로 받는 메서드
+    // 조건 관련 할 때는 criteria를 사용한다.
     public List<Transaction> filterTransactions(Predicate<Transaction> criteria) {
         return transactions.stream()
                 .filter(criteria)
                 .toList();
+
     }
 
-    // 통계 계산 메서드
+    //통계 계산 메서드
+    //제네릭 타입의 R ->메서드 호출자가 어떤 Function을 넘기느냐에 따라 R->double, R->Integer가 될 수 있다
     public <R> R calculateStatistics(
             Predicate<Transaction> filter,
             Function<List<Transaction>, R> statCalculator
-    ) {
+    ){
         List<Transaction> filteredTransactions = filterTransactions(filter);
         return statCalculator.apply(filteredTransactions);
     }
-
-
     public void addTransactions(List<Transaction> sampleTransactions) {
         this.transactions.addAll(sampleTransactions);
     }
 
-    public Map<Month, Map<String, Double>> getMonthlyFinanceSummary() {
+    // 월별 수입 지출 요약 계산 메서드
+    public Map<Month, Map<String,Double>> getMonthlyFinanceSummary() {
         return transactions.stream()
                 .collect(Collectors.groupingBy(
                         Transaction::getMonth,
@@ -46,7 +50,8 @@ public class FinancialAnalyzer {
                 ));
     }
 
-    public Map<String, Double> getCategoryExpenses() {
+    //카테코리별 수입 지출 요약 계산
+    public Map<String, Double> getCategoryExpense() {
         return transactions.stream()
                 .filter(tx -> "expense".equals(tx.getType()))
                 .collect(Collectors.groupingBy(
@@ -55,21 +60,25 @@ public class FinancialAnalyzer {
                 ));
     }
 
-
-    public List<Map.Entry<String, Double>> getTopExpenseCategories(int limit) {
-        return getCategoryExpenses().entrySet().stream()
+    //상위 지출 카테고리별 조회
+    //.Entry, entrySet, comparingByValue()
+    public List<Map.Entry<String,Double>> getTopExpenseCategories(int limit) {
+        return getCategoryExpense().entrySet().stream()
                 .sorted(Map.Entry.<String, Double>comparingByValue().reversed())
                 .limit(limit)
                 .toList();
     }
 
-    // 수입 / 지출 비율 계산
+    //수입 /지출 비율 계산
     public double getExpenseToIncomeRatio() {
+
+        //수입 비율 구하기
         double totalIncome = transactions.stream()
-                .filter(tx -> "income".equals(tx.getType()))
+                .filter(tx ->"income".equals(tx.getType()))
                 .mapToDouble(Transaction::getAmount)
                 .sum();
 
+        //지출 비율 구하기
         double totalExpense = transactions.stream()
                 .filter(tx -> "expense".equals(tx.getType()))
                 .mapToDouble(Transaction::getAmount)
@@ -78,25 +87,26 @@ public class FinancialAnalyzer {
         return (totalIncome > 0) ? (totalExpense / totalIncome) : 0.0;
     }
 
-    // 이상치 거래 감지 메서드
-    public List<Transaction> detectAnomalies(String type, double stdDeviations) {
+    //이상치 거래 감지 메서드
+    public List<Transaction> detectAnomalies(String type, double stdDeviation){
         List<Transaction> filteredTransactions = filterTransactions(tx -> type.equals(tx.getType()));
 
-        // 평균과 표준 편차 계산
+        //평균과 표준 편차 계산
         DoubleSummaryStatistics doubleSummaryStatistics = filteredTransactions.stream()
                 .mapToDouble(Transaction::getAmount)
                 .summaryStatistics();
 
+        //표준 편차에 대한 중앙값을 구하는 메서드
         double mean = doubleSummaryStatistics.getAverage();
 
-        // 표준편차를 계산
+        //표준 편차 계산
         double variance = filteredTransactions.stream()
                 .mapToDouble(tx -> Math.pow(tx.getAmount() - mean, 2))
                 .average()
                 .orElse(0.0);
 
         double stdDev = Math.sqrt(variance);
-        double threshold  = mean + (stdDev * stdDeviations);
+        double threshold = mean + (stdDev * stdDeviation);
 
         return filteredTransactions.stream()
                 .filter(tx -> tx.getAmount() > threshold)
@@ -109,6 +119,7 @@ public class FinancialAnalyzer {
                 !tx.getDate().isBefore(startDate) && !tx.getDate().isAfter(endDate));
     }
 
+    //월별 지출 트랜드
     public Map<Month, Double> getMonthlyExpenseTrend() {
         return transactions.stream()
                 .filter(tx -> "expense".equals(tx.getType()))
@@ -118,31 +129,32 @@ public class FinancialAnalyzer {
                 ));
     }
 
-    public Map<Month, Double> getCategoryMonthlyTrend(String category) {
+    //월별 카테고리 트래늗
+    public Map<Month,Double> getCategoryMonthlyTrend(String category) {
         return transactions.stream()
-                .filter(tx -> "expense".equals(tx.getType()) && category.equals(tx.getCategory()))
+                .filter(tx -> "expense".equals(tx.getType())
+                        && category.equals(tx.getCategory()))
                 .collect(Collectors.groupingBy(
                         Transaction::getMonth,
                         Collectors.summingDouble(Transaction::getAmount)
                 ));
     }
 
+    //가장 많은 지출이 있는 찾기
     public Optional<Map.Entry<LocalDate, Double>> getHighestExpenseDay() {
-        Map<LocalDate, Double> dailyExpenses = transactions.stream()
+         Map<LocalDate,Double> dailyExpense = transactions.stream()
                 .filter(tx -> "expense".equals(tx.getType()))
                 .collect(Collectors.groupingBy(
                         Transaction::getDate,
                         Collectors.summingDouble(Transaction::getAmount)
                 ));
+         return dailyExpense.entrySet().stream()
+                 .max(Map.Entry.<LocalDate, Double>comparingByValue());
 
-        return dailyExpenses.entrySet().stream()
-                .max(Map.Entry.comparingByValue());
     }
 
-
-
     public static void main(String[] args) {
-        FinancialAnalyzer analyzer = new FinancialAnalyzer();
+        FinancialAnalyzerTry analyzer = new FinancialAnalyzerTry();
 
         // 샘플 데이터 초기화
         initializeSampleTransactions(analyzer);
@@ -242,13 +254,15 @@ public class FinancialAnalyzer {
                         entry.getValue()),
                 () -> System.out.println("   지출 내역이 없습니다.")
         );
+
     }
+
 
     /**
      * 샘플 거래 데이터 초기화
      * @param analyzer 거래를 추가할 FinancialAnalyzer 인스턴스
      */
-    private static void initializeSampleTransactions(FinancialAnalyzer analyzer) {
+    private static void initializeSampleTransactions(FinancialAnalyzerTry analyzer) {
         List<Transaction> sampleTransactions = new ArrayList<>();
 
         // 1월 거래
