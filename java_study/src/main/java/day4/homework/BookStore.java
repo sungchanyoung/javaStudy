@@ -79,7 +79,9 @@ public class BookStore {
      * @return 생성된 도서
      */
     public Book addBook(Supplier<Book> supplier) {
-        return books.add(supplier.get()) ? supplier.get() : null;
+        Book newBook = supplier.get();
+        books.add(newBook);
+        return newBook;
     }
 
     /**
@@ -133,9 +135,9 @@ public class BookStore {
      * @return 해당 저자의 도서 목록
      */
     public List<Book> getBooksByAuthor(String author) {
-        return books.stream()
-                .filter(book -> book.getAuthor().equals(author))
-                .toList();
+
+        //findBooks를 활용하기
+       return findBooks(book -> book.getAuthor().equals(author));
     }
 
     /**
@@ -145,8 +147,12 @@ public class BookStore {
      * @return 정렬된 도서 목록
      */
     public List<Book> getBooksOrderedByRating(boolean ascending) {
+        Comparator<Book> comparator =  Comparator.comparing(Book::getRating);
+        if(ascending){
+            comparator = comparator.reversed();
+        }
         return books.stream()
-                .sorted(Comparator.comparing(Book::getRating).reversed())
+                .sorted(comparator)
                 .toList();
     }
 
@@ -155,10 +161,12 @@ public class BookStore {
      *
      * @param title 찾을 도서 제목
      * @return Optional<Book> 객체
+     * findFirst ->그 리스트에 첫번쨰 목록을 반환한다
      */
     public Optional<Book> findBookByTitle(String title) {
-        return books.stream().findAny()
-                .filter(book -> book.getTitle().equals(title));
+        return books.stream()
+                .filter(book -> book.getTitle().equals(title))
+                .findFirst();
 
     }
 
