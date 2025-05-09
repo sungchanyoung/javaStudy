@@ -1,7 +1,7 @@
 package day6.은행계좌이체시스템;
 
 public class BankDemo {
-    public static <BankAccount> void main(String[] args) {
+    public static void main(String[] args) {
         System.out.println("===== 은행계좌이체시스템 예외 처리 데모 =====\n");
 
         // 계좌 생성
