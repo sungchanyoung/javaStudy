@@ -15,12 +15,15 @@ public class WordFrequencyAnalysis implements TextAnalysisStrategy{
         AnalysisResult result = new AnalysisResult(text,"단어 횟수 분석");
 
         Map<String,Integer> wordFrequency = new HashMap<>();
-        StringTokenizer tokenizer = new StringTokenizer(text.toLowerCase(),"\\t\\n\\r\\f.,;:!?'\\\"()[]{}");
+        // \t\n\r\f.,;:!?'\"()[]{} : 구분자를 지정해줍니다.
+        //StringTokenizer : 문자열을 우리가 지정한 구분자로 쪼개는 클래스 입니다
+        StringTokenizer tokenizer = new StringTokenizer(text.toLowerCase(),"\t\n\r\f.,;:!?'\"()[]{}");
 
         int totalCount = 0;
 
         while (tokenizer.hasMoreTokens()){
             String word = tokenizer.nextToken();
+            // \p{Punct}: 문자 부호나 특수 기호를 의미 ->구두점 문자로만 이루어졌는지 확인
             if (word.matches("^[0-9\\\\p{Punct}]+$")){
                 continue;
             }
