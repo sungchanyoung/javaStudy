@@ -11,6 +11,7 @@ import java.util.Date;
 @Getter
 @Setter
 public class SingletonImmediateInitialization {
+    //생성자가 무조건 private로 설정되어 있어야 한다.
     private static final SingletonImmediateInitialization INSTANCE = new SingletonImmediateInitialization();
 
     public enum LogLevel{
