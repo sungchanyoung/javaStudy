@@ -1,0 +1,10 @@
+[yyyy-MM-dd] [DEBUG] 이 디버그 메시지는 INFO 레벨 설정으로 인해 출력되지 않아야 합니다.
+
+[yyyy-MM-dd] [INFO] 정보 메시지 from logger1
+
+[yyyy-MM-dd] [WARNING] 경고 메시지 from logger1
+
+[yyyy-MM-dd] [DEBUG] 디버그 메시지 from logger2 - 이제 출력되어야 함
+
+[yyyy-MM-dd] [ERROR] 예외 발생 - / by zero
+

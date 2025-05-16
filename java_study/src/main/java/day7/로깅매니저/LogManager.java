@@ -62,11 +62,11 @@ public class LogManager {
 
         String timestemp = LocalDateTime.now().format(dateTimeFormatter);
 
-        String foematMessage = String.format("[%s] %s : %s", timestemp, logLevel, message);
+        String formatMessage = String.format("[%s] %s : %s", timestemp, logLevel, message);
 
-        logWriter.println(foematMessage);
+        logWriter.println(formatMessage);
         logWriter.flush();
-        System.out.println(foematMessage);
+        System.out.println(formatMessage);
     }
 
     public void close(){
